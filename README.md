@@ -69,15 +69,16 @@ npm run lint    # ESLint
 把里面的库名替换成 `book_manage_test` 后执行。也就是说测试验的结构与数据，
 和你照着上面第 2 步装出来的环境**是同一份 SQL**。
 
-当前共 102 个用例，分布如下：
+当前共 130 个用例，分布如下：
 
-| 文件 | 覆盖内容 |
-|---|---|
-| `tests/pagination.test.js` | 分页滑动窗口算法的边界（不连库） |
-| `tests/book-list.test.js` | 功能 1 / 2 / 3：列表、模糊查询、详情 |
-| `tests/book-create.test.js` | 功能 4：新增，含绕过前端的服务端校验 |
-| `tests/book-update.test.js` | 功能 5：修改，含**入库人/入库时间防篡改回归** |
-| `tests/book-delete.test.js` | 功能 6：删除，含「GET 不能删数据」 |
+| 文件 | 覆盖内容 | 用例数 |
+|---|---|---|
+| `tests/pagination.test.js` | 分页滑动窗口算法的边界（不连库） | 20 |
+| `tests/book-list.test.js` | 功能 1 / 2 / 3：列表、模糊查询、详情 | 30 |
+| `tests/book-create.test.js` | 功能 4：新增，含绕过前端的服务端校验 | 28 |
+| `tests/book-update.test.js` | 功能 5：修改，含**入库人/入库时间防篡改回归** | 18 |
+| `tests/book-delete.test.js` | 功能 6：删除，含「GET 不能删数据」 | 12 |
+| `tests/frontend-validation.test.js` | 前端 jQuery 必填校验、删除确认框（jsdom 跑真实脚本） | 22 |
 
 ## 五、六个功能与原卷对照
 
@@ -182,6 +183,6 @@ npm run lint    # ESLint
 |---|---|---|
 | #1 后端与数据库 | `feature/backend-crud` | #4 |
 | #2 前端页面 | `feature/frontend-views` | #5 |
-| #3 测试 + CI + README | `chore/ci-and-tests` | 见 PR |
+| #3 测试 + CI + README | `chore/ci-and-tests` | #6 |
 
 CI 在每次推送 `main` 与每个 PR 上自动跑 ESLint + 回归测试。
