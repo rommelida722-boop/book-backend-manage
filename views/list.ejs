@@ -1,0 +1,66 @@
+<%- include('partials/header', { pageTitle: '图书借阅系统-后台管理' }) %>
+
+<h1 class="page-title">图书借阅系统-后台管理</h1>
+
+<!-- 功能 2：按图书名称模糊查询（原卷图-2）。
+     输入框 value 回填上次查询条件，满足原卷「输入框能够记忆查询的条件」。 -->
+<form class="search-bar" method="get" action="/">
+  <label class="search-label" for="search-name">图书名称:</label>
+  <input class="search-input" type="text" id="search-name" name="name"
+         value="<%= query.name %>" />
+  <button class="btn btn-query" type="submit">查询</button>
+</form>
+
+<div class="toolbar">
+  <!-- 功能 4：新增（带上查询条件，返回列表时不会丢失查询结果） -->
+  <a class="btn btn-new" href="/books/new<%= backSuffix %>">新增</a>
+</div>
+
+<!-- 功能 1：图书列表，按入库时间降序，每页 5 条，隔行变色（原卷图-1） -->
+<table class="book-table">
+  <thead>
+    <tr>
+      <th>图书编号</th>
+      <th>图书分类</th>
+      <th>图书名称</th>
+      <th>作者</th>
+      <th>出版社</th>
+      <th>入库时间</th>
+      <th>是否借阅</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (books.length === 0) { %>
+      <tr>
+        <td class="empty-cell" colspan="8">没有查询到符合条件的图书</td>
+      </tr>
+    <% } %>
+
+    <% books.forEach((book, index) => { %>
+      <!-- 隔行变色：奇数行加 row-alt（原卷要求「图书列表隔行变色」） -->
+      <tr class="<%= index % 2 === 1 ? 'row-alt' : '' %>">
+        <td><%= book.bookCode %></td>
+        <td><%= book.typeName || '' %></td>
+        <td><%= book.bookName %></td>
+        <td><%= book.bookAuthor %></td>
+        <td><%= book.publishPress %></td>
+        <td><%= book.creationTimeText %></td>
+        <td><%= book.borrowedText %></td>
+        <td class="ops">
+          <a class="op-link" href="/books/<%= book.bookId %><%= backSuffix %>">查看</a>
+          <a class="op-link" href="/books/<%= book.bookId %>/edit<%= backSuffix %>">修改</a>
+          <!-- 删除用 POST：用 GET 的话，浏览器预取或爬虫扫到链接就会误删数据 -->
+          <form class="inline-form" method="post"
+                action="/books/<%= book.bookId %>/delete">
+            <button type="submit" class="op-link op-delete js-delete">删除</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('partials/pagination', { pagination: pagination, query: query }) %>
+
+<%- include('partials/footer') %>

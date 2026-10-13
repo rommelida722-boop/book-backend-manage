@@ -1,0 +1,143 @@
+<%
+  /*
+   * 新增（图-4）与修改（图-6）共用同一套模板。
+   * 两者字段、布局完全一致，只有标题、按钮文案、提交地址，以及
+   * 「入库人 / 入库时间」是否只读这三点不同，用 mode 区分即可，
+   * 拆成两个文件会产生大量重复代码。
+   *
+   * 布局：两列四行（DOM 按行书写，交给 CSS grid 自动分两列）
+   *   第 1 行：图书编号* | 图书名称*
+   *   第 2 行：图书类型* | 作者
+   *   第 3 行：出版社   | 是否借阅*
+   *   第 4 行：入库人*  | 入库时间*
+   *
+   * 必填星号 * 只出现在原卷图-4 标了 * 的 6 个字段上：
+   *   图书编号、图书名称、图书类型、是否借阅、入库人、入库时间
+   *   作者、出版社没有星号
+   */
+  const isEdit = mode === 'edit';
+
+  // 修改页：入库人 / 入库时间只读（原卷明确要求，不可修改）
+  const metaReadonly = isEdit ? 'readonly' : '';
+
+  // 取值兼容三种来源：数据库行、新增页默认值、校验失败后回填的表单内容
+  const value = (field) => {
+    const v = book[field];
+    return v === undefined || v === null ? '' : String(v);
+  };
+  const creationTimeValue = book.creationTimeText || value('creationTime');
+  const borrowedValue = value('borrowed') || String(0);
+  const bookTypeValue = value('bookType');
+
+  // 服务端校验错误：按字段名取出对应提示
+  const errorFor = (field) => {
+    const hit = (errors || []).find((item) => item.field === field);
+    return hit ? hit.message : '';
+  };
+  const fieldClass = (field) => (errorFor(field) ? 'field has-error' : 'field');
+%>
+<%- include('partials/header', { pageTitle: isEdit ? '修改图书信息' : '新增图书信息' }) %>
+
+<h1 class="page-title"><%= isEdit ? '修改图书信息' : '新增图书信息' %></h1>
+
+<form id="book-form" class="book-form" method="post" action="<%= action %>">
+  <div class="form-grid">
+
+    <!-- 第 1 行左：图书编号（必填） -->
+    <div class="<%= fieldClass('bookCode') %>">
+      <label class="field-label" for="bookCode">图书编号：</label>
+      <input class="field-input" type="text" id="bookCode" name="bookCode"
+             value="<%= value('bookCode') %>" maxlength="50" />
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('bookCode') %></span>
+    </div>
+
+    <!-- 第 1 行右：图书名称（必填） -->
+    <div class="<%= fieldClass('bookName') %>">
+      <label class="field-label" for="bookName">图书名称：</label>
+      <input class="field-input" type="text" id="bookName" name="bookName"
+             value="<%= value('bookName') %>" maxlength="100" />
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('bookName') %></span>
+    </div>
+
+    <!-- 第 2 行左：图书类型（必填，选项必须来自 book_type 表） -->
+    <div class="<%= fieldClass('bookType') %>">
+      <label class="field-label" for="bookType">图书类型：</label>
+      <select class="field-input" id="bookType" name="bookType">
+        <option value="">——请选择——</option>
+        <% bookTypes.forEach((type) => { %>
+          <option value="<%= type.id %>"
+                  <%= String(type.id) === bookTypeValue ? 'selected' : '' %>>
+            <%= type.typeName %>
+          </option>
+        <% }) %>
+      </select>
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('bookType') %></span>
+    </div>
+
+    <!-- 第 2 行右：作者（选填，图-4 无星号） -->
+    <div class="<%= fieldClass('bookAuthor') %>">
+      <label class="field-label" for="bookAuthor">作者：</label>
+      <input class="field-input" type="text" id="bookAuthor" name="bookAuthor"
+             value="<%= value('bookAuthor') %>" maxlength="50" />
+      <span class="field-error"><%= errorFor('bookAuthor') %></span>
+    </div>
+
+    <!-- 第 3 行左：出版社（选填，图-4 无星号） -->
+    <div class="<%= fieldClass('publishPress') %>">
+      <label class="field-label" for="publishPress">出版社：</label>
+      <input class="field-input" type="text" id="publishPress" name="publishPress"
+             value="<%= value('publishPress') %>" maxlength="100" />
+      <span class="field-error"><%= errorFor('publishPress') %></span>
+    </div>
+
+    <!-- 第 3 行右：是否借阅（必填，1=已借阅 0=未借阅，默认未借阅） -->
+    <div class="<%= fieldClass('borrowed') %>">
+      <label class="field-label" for="borrowed">是否借阅：</label>
+      <select class="field-input" id="borrowed" name="borrowed">
+        <option value="0" <%= borrowedValue === '0' ? 'selected' : '' %>>未借阅</option>
+        <option value="1" <%= borrowedValue === '1' ? 'selected' : '' %>>已借阅</option>
+      </select>
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('borrowed') %></span>
+    </div>
+
+    <!-- 第 4 行左：入库人（必填；新增页可改，修改页只读） -->
+    <div class="<%= fieldClass('createdBy') %>">
+      <label class="field-label" for="createdBy">入库人：</label>
+      <input class="field-input" type="text" id="createdBy" name="createdBy"
+             value="<%= value('createdBy') %>" maxlength="50" <%= metaReadonly %> />
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('createdBy') %></span>
+    </div>
+
+    <!-- 第 4 行右：入库时间（必填；默认当天，修改页只读） -->
+    <div class="<%= fieldClass('creationTime') %>">
+      <label class="field-label" for="creationTime">入库时间：</label>
+      <input class="field-input" type="date" id="creationTime" name="creationTime"
+             value="<%= creationTimeValue %>" <%= metaReadonly %> />
+      <span class="required-mark">*</span>
+      <span class="field-error"><%= errorFor('creationTime') %></span>
+    </div>
+
+  </div>
+
+  <% if ((errors || []).length > 0) { %>
+    <ul class="error-summary">
+      <% errors.forEach((item) => { %>
+        <li><%= item.message %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <div class="form-actions">
+    <!-- 保存 / 修改：原卷要求点击后跳回图书信息列表页面 -->
+    <button class="btn btn-submit" type="submit"><%= isEdit ? '修改' : '保存' %></button>
+    <!-- 返回：同样跳回列表页，并保留原来的查询条件 -->
+    <a class="btn btn-back" href="/<%= backSuffix %>">返回</a>
+  </div>
+</form>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,46 @@
+<%
+  /*
+   * 分页条（对齐原卷图-1）：
+   *   上一页 ◀ 1 2 3 4 5 6 7 8 9 ▶ 下一页   共100页 到第[ ]页 [确定]
+   *
+   * 关键点：每次翻页都要把查询条件 name 一起带上，
+   * 否则「查询后再翻页」会退回成全量列表——这正是原卷图-2 要避免的情况。
+   */
+  const buildPageUrl = (targetPage) => {
+    const params = new URLSearchParams();
+    if (query.name) {
+      params.set('name', query.name);
+    }
+    params.set('page', String(targetPage));
+    return `/?${params.toString()}`;
+  };
+%>
+<div class="pagination">
+  <a class="page-nav<%= pagination.hasPrev ? '' : ' is-disabled' %>"
+     href="<%= buildPageUrl(Math.max(1, pagination.page - 1)) %>">上一页</a>
+
+  <span class="page-arrow">◀</span>
+
+  <% pagination.pages.forEach((pageNo) => { %>
+    <% if (pageNo === pagination.page) { %>
+      <span class="page-num is-current"><%= pageNo %></span>
+    <% } else { %>
+      <a class="page-num" href="<%= buildPageUrl(pageNo) %>"><%= pageNo %></a>
+    <% } %>
+  <% }) %>
+
+  <span class="page-arrow">▶</span>
+
+  <a class="page-nav<%= pagination.hasNext ? '' : ' is-disabled' %>"
+     href="<%= buildPageUrl(Math.min(pagination.totalPages, pagination.page + 1)) %>">下一页</a>
+
+  <span class="page-total">共<%= pagination.totalPages %>页</span>
+
+  <form class="page-jump" method="get" action="/">
+    <% if (query.name) { %>
+      <input type="hidden" name="name" value="<%= query.name %>" />
+    <% } %>
+    到第<input type="text" class="page-jump-input" name="page" value="" />页
+    <button type="submit" class="btn btn-jump">确定</button>
+  </form>
+</div>

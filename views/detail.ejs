@@ -1,0 +1,55 @@
+<%- include('partials/header', { pageTitle: '查看图书信息' }) %>
+
+<h1 class="page-title">查看图书信息</h1>
+
+<!-- 功能 3：图书详情（原卷图-3）。
+     全部字段只读，故统一用 readonly 输入框呈现。
+     用 readonly 而不是 disabled：disabled 的控件不会随表单提交，且文字发灰难读。 -->
+<div class="form-grid">
+  <div class="field">
+    <label class="field-label" for="bookCode">图书编号：</label>
+    <input class="field-input" type="text" id="bookCode" value="<%= book.bookCode %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="bookName">图书名称：</label>
+    <input class="field-input" type="text" id="bookName" value="<%= book.bookName %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="bookType">图书类型：</label>
+    <input class="field-input" type="text" id="bookType" value="<%= book.typeName || '' %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="bookAuthor">作者：</label>
+    <input class="field-input" type="text" id="bookAuthor" value="<%= book.bookAuthor %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="publishPress">出版社：</label>
+    <input class="field-input" type="text" id="publishPress" value="<%= book.publishPress %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="borrowed">是否借阅：</label>
+    <input class="field-input" type="text" id="borrowed" value="<%= book.borrowedText %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="createdBy">入库人：</label>
+    <input class="field-input" type="text" id="createdBy" value="<%= book.createdBy %>" readonly />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="creationTime">入库时间：</label>
+    <input class="field-input" type="text" id="creationTime" value="<%= book.creationTimeText %>" readonly />
+  </div>
+</div>
+
+<div class="form-actions">
+  <!-- 返回列表页并保留查询条件与查询结果（原卷对图-3 的明确要求） -->
+  <a class="btn btn-back" href="/<%= backSuffix %>">返回</a>
+</div>
+
+<%- include('partials/footer') %>

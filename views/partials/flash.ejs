@@ -1,0 +1,20 @@
+<%
+  /*
+   * 操作结果提示弹窗（原卷图-5 / 图-7 / 图-9 都是浏览器原生弹窗）。
+   *
+   * 文案来自 constants.FLASH_MESSAGES 白名单，但这里仍做一次防护：
+   * JSON.stringify 负责转义引号与换行，再把 `<` 换成 <，
+   * 这样即使文案里出现 `</script>` 也无法提前闭合脚本标签。
+   */
+  const flashText = typeof flash !== 'undefined' ? flash : '';
+%>
+<% if (flashText) { %>
+<script>
+  (function () {
+    var message = <%- JSON.stringify(flashText).replace(/</g, '\\u003c') %>;
+    window.addEventListener('DOMContentLoaded', function () {
+      window.alert(message);
+    });
+  })();
+</script>
+<% } %>
