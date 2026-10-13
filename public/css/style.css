@@ -1,0 +1,381 @@
+@charset "utf-8";
+
+/* =============================================================================
+   图书借阅系统-后台管理  样式表
+   -----------------------------------------------------------------------------
+   目标：还原原试卷图-1 ~ 图-9 的界面观感 ——
+     · 居中大标题
+     · 表格：深灰底白字表头 + 隔行变色 + 居中单元格
+     · 分页条右下角对齐：上一页 ◀ 1 2 3 ▶ 下一页  共N页 到第[ ]页 [确定]
+     · 表单：两列四行，标签右对齐、输入框左对齐，必填项后缀 *
+     · 按钮：Windows 风格浅灰立体按钮
+   ========================================================================== */
+
+/* —— 基础 —— */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 20px 60px;
+  background: #fff;
+  color: #000;
+  /* 中文优先用雅黑，回退到宋体；英文回退 Arial */
+  font-family: "Microsoft YaHei", "微软雅黑", SimSun, "宋体", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: #3333cc;
+}
+
+/* —— 页面大标题（图-1 / 图-3 / 图-4 / 图-6）—— */
+.page-title {
+  margin: 16px 0 34px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #1a1a1a;
+}
+
+/* =============================================================================
+   列表页（图-1 / 图-2 / 图-9）
+   ========================================================================== */
+
+/* —— 查询区：标签 + 输入框 + 查询按钮 —— */
+.search-bar {
+  width: 960px;
+  margin: 0 auto 18px;
+  text-align: center;
+}
+
+.search-label {
+  margin-right: 6px;
+}
+
+.search-input {
+  width: 230px;
+  height: 24px;
+  padding: 1px 5px;
+  border: 1px solid #7f9db9;
+  font-family: inherit;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* —— 「新增」按钮所在的一行，左对齐 —— */
+.toolbar {
+  width: 960px;
+  margin: 0 auto 8px;
+  text-align: left;
+}
+
+/* —— 图书列表 —— */
+.book-table {
+  width: 960px;
+  margin: 0 auto;
+  /* 用 collapse 让相邻单元格共用一条边框，对齐原图的细网格观感 */
+  border-collapse: collapse;
+
+  /* 刻意不用 table-layout: fixed。
+     fixed 布局要求列宽全由 CSS 指定，一旦某一列宽给少了，
+     超出的文字会被直接裁掉——之前「图书分类」表头就被裁成了「图书...」，
+     更糟的是「操作」列的删除按钮曾整块消失。
+     改用默认的 auto 布局：列宽按内容自动分配，内容永远优先于美观，
+     再配合 width: 960px 把整表拉到与原图相近的宽度。 */
+  table-layout: auto;
+}
+
+.book-table th,
+.book-table td {
+  padding: 7px 8px;
+  border: 1px solid #fff;
+  text-align: center;
+  vertical-align: middle;
+  /* 单元格内不换行，保证每行高度整齐（列宽交给 auto 布局算） */
+  white-space: nowrap;
+}
+
+/* 表头：深灰底 + 白字加粗 */
+.book-table thead th {
+  background: #808080;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+/* 隔行变色：奇数行浅灰底（EJS 给奇数行加了 row-alt） */
+.book-table tbody tr {
+  background: #fff;
+}
+
+.book-table tbody tr.row-alt {
+  background: #e9e9e9;
+}
+
+/* 空结果占位行不参与隔行变色，避免看起来很怪 */
+.book-table tbody tr .empty-cell {
+  background: #fff;
+  color: #888;
+  padding: 24px 0;
+}
+
+/* 只给「图书名称」一个较宽的下限，避免书名很长时把它自己挤成两行；
+   其余列宽全部交给 auto 布局按内容分配，不再手写百分比。 */
+.book-table th:nth-child(3) {
+  min-width: 150px;
+}
+
+/* —— 操作列：查看 / 修改 / 删除 —— */
+.ops {
+  white-space: nowrap;
+}
+
+.op-link {
+  margin: 0 2px;
+  color: #3333cc;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.op-link:hover {
+  text-decoration: underline;
+}
+
+/* 删除是按钮但外观要和相邻链接一致（原图里三者并排看不出差别） */
+.op-delete {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* 行内表单：让它表现成 inline，不影响「查看 修改 删除」的同一行排布 */
+.inline-form {
+  display: inline;
+}
+
+/* —— 分页条（图-1）—— */
+.pagination {
+  width: 960px;
+  margin: 16px auto 0;
+  text-align: right;
+  font-size: 14px;
+  /* 页码之间不要被换行拆开 */
+  white-space: nowrap;
+}
+
+.pagination .page-nav {
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.pagination .page-nav:hover {
+  text-decoration: underline;
+}
+
+.pagination .page-arrow {
+  margin: 0 4px;
+  color: #1a1a1a;
+}
+
+.pagination .page-num {
+  display: inline-block;
+  min-width: 18px;
+  margin: 0 2px;
+  color: #3333cc;
+  text-decoration: none;
+  text-align: center;
+}
+
+.pagination .page-num:hover {
+  text-decoration: underline;
+}
+
+.pagination .page-num.is-current {
+  font-weight: 700;
+  color: #000;
+  text-decoration: none;
+}
+
+/* 首/末页时禁用态的上一页、下一页 */
+.pagination .is-disabled {
+  color: #aaa;
+  text-decoration: none !important;
+  cursor: default;
+}
+
+.pagination .page-total {
+  margin: 0 10px 0 16px;
+}
+
+.page-jump {
+  display: inline;
+}
+
+.page-jump-input {
+  width: 42px;
+  height: 22px;
+  margin: 0 4px;
+  padding: 1px 4px;
+  border: 1px solid #7f9db9;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* =============================================================================
+   表单页（图-3 查看 / 图-4 新增 / 图-6 修改）
+   ========================================================================== */
+
+/* 两列四行；DOM 按行书写，由 grid 自动分成左右两列 */
+.form-grid {
+  display: grid;
+  grid-template-columns: 380px 380px;
+  gap: 26px 24px;
+  width: 784px;
+  margin: 0 auto;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 标签定宽并右对齐，这样每列的输入框左边缘能对齐（对齐原图） */
+.field-label {
+  flex: 0 0 76px;
+  text-align: right;
+}
+
+.field-input {
+  flex: 0 0 200px;
+  width: 200px;
+  height: 24px;
+  padding: 1px 5px;
+  border: 1px solid #7f9db9;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* 下拉框给日历/箭头留点内部空间 */
+select.field-input {
+  padding: 1px 2px;
+}
+
+/* 只读字段：原图里和可编辑字段长得一样，这里只加极浅底色做提示，
+   不做置灰，避免偏离原图观感 */
+.field-input[readonly] {
+  background: #f7f7f7;
+  cursor: default;
+}
+
+.required-mark {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  color: #333;
+}
+
+/* 校验错误提示：flex-basis 100% 把它挤到下一行，不撑宽当前行 */
+.field-error {
+  flex: 1 0 100%;
+  margin: 3px 0 0 76px;
+  color: #cc0000;
+  font-size: 12px;
+}
+
+/* 没有错误时彻底移出布局，避免占位 */
+.field-error:empty {
+  display: none;
+}
+
+.field.has-error .field-input {
+  border-color: #cc0000;
+  background: #fff5f5;
+}
+
+/* 服务端校验失败的汇总提示（前端 jQuery 拦截失败时的兜底展示） */
+.error-summary {
+  width: 784px;
+  margin: 22px auto 0;
+  padding: 10px 16px 10px 34px;
+  border: 1px solid #f0c0c0;
+  background: #fff5f5;
+  color: #cc0000;
+}
+
+/* —— 底部按钮区 —— */
+.form-actions {
+  margin-top: 42px;
+  text-align: center;
+}
+
+/* =============================================================================
+   按钮：Windows 风格浅灰立体按钮（对齐原图观感）
+   ========================================================================== */
+.btn {
+  display: inline-block;
+  min-width: 64px;
+  margin: 0 9px;
+  padding: 3px 14px;
+  border: 1px solid #a0a0a0;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #fdfdfd 0%, #ececec 55%, #e2e2e2 100%);
+  color: #000;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: #7f9db9;
+  background: linear-gradient(to bottom, #ffffff 0%, #f2f7fb 55%, #e6f0f8 100%);
+}
+
+.btn:active {
+  background: linear-gradient(to bottom, #dcdcdc 0%, #eaeaea 100%);
+}
+
+/* 原图里「查询」按钮上有淡蓝聚焦光圈 */
+.btn:focus {
+  outline: none;
+  border-color: #5b9bd5;
+  box-shadow: 0 0 4px rgba(91, 155, 213, 0.9);
+}
+
+/* 小号按钮：分页条的「确定」，以及「新增」 */
+.btn-jump,
+.btn-new {
+  min-width: 46px;
+  padding: 2px 10px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* =============================================================================
+   错误页
+   ========================================================================== */
+.error-box {
+  width: 784px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  border: 1px solid #f0c0c0;
+  background: #fff5f5;
+  text-align: center;
+}
+
+.error-message {
+  margin: 0;
+  color: #cc0000;
+  font-size: 15px;
+}

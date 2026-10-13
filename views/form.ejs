@@ -113,11 +113,15 @@
       <span class="field-error"><%= errorFor('createdBy') %></span>
     </div>
 
-    <!-- 第 4 行右：入库时间（必填；默认当天，修改页只读） -->
+    <!-- 第 4 行右：入库时间（必填；默认当天，修改页只读）
+         刻意用 type="text" 而不是 type="date"：
+         type="date" 的显示格式由浏览器语言决定，在中文 Chrome 下会渲染成
+         2014/03/12，与原卷图-4 的 2014-03-12 不一致；text 才能稳定呈现
+         原图的「年-月-日」。格式正确性由前端 jQuery 与服务端共同校验。 -->
     <div class="<%= fieldClass('creationTime') %>">
       <label class="field-label" for="creationTime">入库时间：</label>
-      <input class="field-input" type="date" id="creationTime" name="creationTime"
-             value="<%= creationTimeValue %>" <%= metaReadonly %> />
+      <input class="field-input" type="text" id="creationTime" name="creationTime"
+             value="<%= creationTimeValue %>" placeholder="年-月-日" <%= metaReadonly %> />
       <span class="required-mark">*</span>
       <span class="field-error"><%= errorFor('creationTime') %></span>
     </div>
