@@ -11,7 +11,10 @@ on:
 jobs:
   test:
     name: ESLint + Jest（打真 MySQL）
-    runs-on: ubuntu-latest
+    # 固定镜像而非 ubuntu-latest：与下面固定 mysql:8.0 同理，
+    # 避免 GitHub 迁移 runner 默认镜像（2026-10-19 起 latest 指向 Ubuntu 26）
+    # 时环境悄悄变化、结果不可复现。ubuntu-24.04 即当前 latest 实际解析到的版本。
+    runs-on: ubuntu-24.04
 
     # ★ 测试不用 mock，直接连一个真的 MySQL 8。
     #   本项目最容易出问题的地方（字符集、DATE_FORMAT、外键约束、
