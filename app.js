@@ -40,7 +40,6 @@ app.use((req, res) => {
 // —— 统一错误处理 ——
 // 原卷注意事项第 3 条要求「操作数据库时进行必要的异常处理」：
 // 这里兜住所有未捕获异常，日志打全栈，页面只给一句人话，不把 SQL 和堆栈暴露给用户。
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   console.error(err);

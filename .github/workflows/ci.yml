@@ -1,0 +1,86 @@
+name: CI
+
+# 作业第 6 条要求「使用 Actions 进行回归测试」：
+# 每次推送到 main、以及每个 PR 都自动跑一遍 lint + 测试。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: ESLint + Jest（打真 MySQL）
+    runs-on: ubuntu-latest
+
+    # ★ 测试不用 mock，直接连一个真的 MySQL 8。
+    #   本项目最容易出问题的地方（字符集、DATE_FORMAT、外键约束、
+    #   UPDATE 语句漏列导致入库人被篡改）只有连真库才验得出来。
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+        ports:
+          - 3306:3306
+        # 必须等 MySQL 真正就绪再跑测试，否则第一步连库就失败
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ci_root_password
+      # 测试库由 tests/helpers/globalSetup.js 自动创建与删除，
+      # 这里不必预先建库；库名固定为 book_manage_test
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安装依赖（严格按 package-lock.json）
+        run: npm ci
+
+      - name: 等待 MySQL 就绪
+        # 用已装好的 mysql2 探活，不依赖 runner 上是否预装 mysql 客户端
+        run: |
+          node -e "
+          const mysql = require('mysql2/promise');
+          (async () => {
+            for (let i = 1; i <= 30; i++) {
+              try {
+                const c = await mysql.createConnection({
+                  host: process.env.DB_HOST,
+                  port: Number(process.env.DB_PORT),
+                  user: process.env.DB_USER,
+                  password: process.env.DB_PASSWORD,
+                });
+                await c.query('SELECT 1');
+                await c.end();
+                console.log('MySQL 已就绪（第 ' + i + ' 次尝试）');
+                process.exit(0);
+              } catch (e) {
+                console.log('等待 MySQL... (' + i + ') ' + e.code);
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            }
+            console.error('MySQL 在 60 秒内没有就绪');
+            process.exit(1);
+          })();
+          "
+
+      - name: 代码规范检查
+        run: npm run lint
+
+      - name: 回归测试（Jest + supertest）
+        run: npm test
