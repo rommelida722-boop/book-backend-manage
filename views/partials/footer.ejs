@@ -1,0 +1,4 @@
+<%# flash 用 locals 兜底：详情页等并不传 flash，显式给默认值可避免模板变量未定义 %>
+<%- include('flash', { flash: locals.flash || '' }) %>
+</body>
+</html>

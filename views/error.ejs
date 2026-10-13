@@ -1,0 +1,13 @@
+<%- include('partials/header', { pageTitle: title }) %>
+
+<h1 class="page-title"><%= title %></h1>
+
+<div class="error-box">
+  <p class="error-message"><%= message %></p>
+</div>
+
+<div class="form-actions">
+  <a class="btn btn-back" href="/<%= backSuffix %>">返回列表</a>
+</div>
+
+<%- include('partials/footer') %>
