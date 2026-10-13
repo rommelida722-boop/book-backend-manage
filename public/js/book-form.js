@@ -16,6 +16,30 @@
    *  因此格式正确性得自己校验，不能再依赖浏览器的原生日期控件。 */
   var DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+  /**
+   * 判断是不是一个真实存在的日期，逻辑与服务端 bookService.isRealDate 保持一致。
+   *
+   * 不能只用 isNaN(new Date(...))：JS 会把越界日期自动进位，
+   * 2014-02-30 会变成 2014-03-02、2014-04-31 会变成 2014-05-01，
+   * 于是这些不存在的日期会被当成合法值放过去，最后在服务端写库时报错。
+   * 这里把解析结果格式化回去与原串比对，才能识别出这类日期。
+   *
+   * @param {string} value 形如 2014-03-12
+   * @returns {boolean}
+   */
+  function isRealDate(value) {
+    var date = new Date(value + 'T00:00:00');
+    if (isNaN(date.getTime())) {
+      return false;
+    }
+
+    var pad = function (n) {
+      return (n < 10 ? '0' : '') + n;
+    };
+    var roundTrip = date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    return roundTrip === value;
+  }
+
   var FIELDS = [
     { id: 'bookCode', label: '图书编号', required: true },
     { id: 'bookName', label: '图书名称', required: true },
@@ -44,8 +68,8 @@
     if (value !== '' && field.pattern && !field.pattern.test(value)) {
       return field.patternMessage;
     }
-    // 形如 2014-13-45 的日期能过正则，但不是真实日期
-    if (value !== '' && field.pattern && isNaN(new Date(value + 'T00:00:00').getTime())) {
+    // 形如 2014-13-45、2014-02-30 的日期能过正则，但不是真实存在的日期
+    if (value !== '' && field.pattern && !isRealDate(value)) {
       return field.label + '不是一个有效日期';
     }
     return '';
