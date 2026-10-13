@@ -31,6 +31,30 @@ const MAX_LENGTH = {
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
+ * 判断是不是一个**真实存在**的日期。
+ *
+ * 只用 `new Date()` 判 NaN 是不够的：JS 对越界日期会自动进位，
+ * `new Date('2014-02-30T00:00:00')` 会变成 2014-03-02，`2014-04-31` 会变成 5-01，
+ * 于是「2 月 30 日」这种根本不存在的日期会一路通过校验，
+ * 最后被 MySQL 严格模式拒绝、抛出一个 500。
+ *
+ * 所以这里把解析结果再格式化回去跟原串比对——只有能原样还原的才是合法日期。
+ *
+ * @param {string} value 形如 2014-03-12
+ * @returns {boolean}
+ */
+function isRealDate(value) {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const roundTrip = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return roundTrip === value;
+}
+
+/**
  * 取本地当天日期，格式 yyyy-MM-dd。
  *
  * 刻意不用 toISOString()：那是 UTC 时间，在东八区晚上 8 点后算出来的「今天」
@@ -214,19 +238,22 @@ async function validateBookForm(raw = {}) {
     push('createdBy', `入库人长度不能超过 ${MAX_LENGTH.createdBy} 个字符`);
   }
 
-  // —— 入库时间：必填，格式必须是 年-月-日 ——
+  // —— 入库时间：必填，格式必须是 年-月-日，且必须是真实存在的日期 ——
   const creationTime = text(raw.creationTime);
   if (!creationTime) {
     push('creationTime', '入库时间不能为空');
   } else if (!DATE_PATTERN.test(creationTime)) {
     push('creationTime', '入库时间格式不正确，应为 年-月-日');
-  } else if (Number.isNaN(new Date(`${creationTime}T00:00:00`).getTime())) {
+  } else if (!isRealDate(creationTime)) {
     push('creationTime', '入库时间不是一个有效日期');
   }
 
   // —— 出版日期：图-4 中没有该字段，所以页面不会传过来；
   //    但数据库列非空，这里补当天日期。表单若传了合法值则优先采用。 ——
   const rawPublishDate = text(raw.publishDate);
+  if (rawPublishDate && (!DATE_PATTERN.test(rawPublishDate) || !isRealDate(rawPublishDate))) {
+    push('publishDate', '出版日期不是一个有效日期');
+  }
   const publishDate = rawPublishDate || todayString();
 
   return {
@@ -318,4 +345,5 @@ module.exports = {
   updateBook,
   deleteBook,
   todayString,
+  isRealDate,
 };
