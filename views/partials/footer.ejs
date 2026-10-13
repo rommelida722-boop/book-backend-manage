@@ -1,3 +1,8 @@
+<%# jQuery 用本地文件而非 CDN：1.8.3 是 2012 年的版本，公共 CDN 上的链接已不稳定，且离线与 CI 环境取不到 %>
+<script src="/vendor/jquery-1.8.3.min.js"></script>
+<%# 两个脚本各自以「元素是否存在」为前提，所以在所有页面统一加载也不会报错 %>
+<script src="/js/book-form.js"></script>
+<script src="/js/book-list.js"></script>
 <%# flash 用 locals 兜底：详情页等并不传 flash，显式给默认值可避免模板变量未定义 %>
 <%- include('flash', { flash: locals.flash || '' }) %>
 </body>
